@@ -226,7 +226,7 @@ func (client *Client) getCycleData(ctx context.Context, baker []byte, cycle int6
 }
 
 func (client *Client) getProtocolRewardsCycleData(ctx context.Context, baker []byte, cycle int64) (*tzktBakersCycleData, error) {
-	u := fmt.Sprintf("v1/rewards/split/%s/%d", baker, cycle)
+	u := fmt.Sprintf("v1/rewards/split/%s/%d?limit=10000", baker, cycle)
 	slog.Debug("getting protocol rewards cycle data", "baker", baker, "cycle", cycle, "url", u)
 	resp, err := client.GetFromProtocolRewards(ctx, u)
 	if err != nil {
