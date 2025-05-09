@@ -408,7 +408,7 @@ func (client *Client) GetCycleData(ctx context.Context, chainId tezos.ChainIdHas
 		//	return agg
 		//}, 0)
 
-		if utils.Abs(bakingPower.Int64()-tzktBakerCycleData.BakingPower) > tzktBakerCycleData.BakingPower/1000 { // up to numberOfStakers difference in mutez is allowed - rounding deviations from staking_numerator/staking_denominator
+		if utils.Abs(bakingPower.Int64()-tzktBakerCycleData.BakingPower) > tzktBakerCycleData.BakingPower/50 { // up to numberOfStakers difference in mutez is allowed - rounding deviations from staking_numerator/staking_denominator
 			slog.Error("bakingPower mismatch", "bakingPower", bakingPower, "tzktBakerCycleData.BakingPower", tzktBakerCycleData.BakingPower)
 			return nil, errors.Join(constants.ErrCycleDataProtocolRewardsMismatch, fmt.Errorf("bakingPower: %d, tzktBakerCycleData.BakingPower: %d, diff: %d", bakingPower.Int64(), tzktBakerCycleData.BakingPower, bakingPower.Int64()-tzktBakerCycleData.BakingPower))
 		}
