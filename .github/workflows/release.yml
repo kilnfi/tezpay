@@ -22,53 +22,17 @@ jobs:
       - name: inject version
         run: |
           eli .github/inject-version.lua ${{ github.ref_name }}
-          
-      - name: Build win-arm64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-win-arm64.exe
-      - name: Build win-amd64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-win-amd64.exe
-      - name: Build linux-arm64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-linux-arm64
-      - name: Build linux-riscv64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=riscv64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-linux-riscv64
+
       - name: Build linux-amd64
         run: env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-linux-amd64
-      - name: Build macos-arm64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-macos-arm64
-      - name: Build macos-amd64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay-macos-amd64
 
       # build payout-fa
-      - name: Build payout-fa win-arm64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-win-arm64.exe ./extension/official/payout-fa/
-      - name: Build payout-fa win-amd64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-win-amd64.exe ./extension/official/payout-fa/
-      - name: Build payout-fa linux-arm64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-linux-arm64 ./extension/official/payout-fa/
-      - name: Build payout-fa linux-riscv64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=riscv64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-linux-riscv64 ./extension/official/payout-fa/
       - name: Build payout-fa linux-amd64
         run: env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-linux-amd64 ./extension/official/payout-fa/
-      - name: Build payout-fa macos-arm64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-macos-arm64 ./extension/official/payout-fa/
-      - name: Build payout-fa macos-amd64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fa-macos-amd64 ./extension/official/payout-fa/
 
       # Build payout-fixer
-      - name: Build payout-fixer win-arm64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-win-arm64.exe ./extension/official/payout-fixer/
-      - name: Build payout-fixer win-amd64
-        run: env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-win-amd64.exe ./extension/official/payout-fixer/
-      - name: Build payout-fixer linux-arm64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-linux-arm64 ./extension/official/payout-fixer/
-      - name: Build payout-fixer linux-riscv64
-        run: env CGO_ENABLED=0 GOOS=linux GOARCH=riscv64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-linux-riscv64 ./extension/official/payout-fixer/
       - name: Build payout-fixer linux-amd64
         run: env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-linux-amd64 ./extension/official/payout-fixer/
-      - name: Build payout-fixer macos-arm64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-macos-arm64 ./extension/official/payout-fixer/
-      - name: Build payout-fixer macos-amd64
-        run: env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/tezpay_payout-fixer-macos-amd64 ./extension/official/payout-fixer/
 
       - name: Upload files to a GitHub release
         uses: svenstaro/upload-release-action@2.4.0
@@ -76,62 +40,3 @@ jobs:
           file_glob: true
           tag: ${{ github.ref }}
           file: bin/tezpay*
-          
-  build-containers:
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event.release.prerelease == false
-    steps:
-      - uses: actions/checkout@v3
-      - name: Login to ghcr.io
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build and publish container
-        uses: docker/build-push-action@v4
-        with:
-          file: ./container/Containerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          tags: ghcr.io/tez-capital/tezpay:latest,ghcr.io/tez-capital/tezpay:${{github.ref_name}}
-          push: true
-          provenance: false
-
-      - name: Build and publish riscv64 container
-        uses: docker/build-push-action@v4
-        with:
-          file: ./container/riscv64/Containerfile
-          platforms: linux/riscv64
-          build-args: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          tags: ghcr.io/tez-capital/riscv64/tezpay:latest,ghcr.io/tez-capital/riscv64/tezpay:${{github.ref_name}}
-          push: true
-          provenance: false
-
-  notify:
-    runs-on: ubuntu-latest
-    needs: [build, build-containers]
-    if: github.event.release.prerelease == false
-    steps:
-      - name: Ami Tezpay Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.AMI_TEZPAY_ACCESS_TOKEN }}
-          repository: tez-capital/ami-tezpay
-          event-type: tezpay-release
-          client-payload: '{ "id": "${{ steps.repository_info.outputs.ID }}", "repository": "${{github.repository}}", "version": "${{github.ref_name}}" }'
-
-      - name: Notify new version available
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.PB_DISCORD_WEBHOOK }}
-        with:
-            args: "New tezpay ${{ github.ref_name }} released. (<https://github.com/tez-capital/tezpay/releases/tag/${{ github.ref_name }}>)"
